@@ -9,14 +9,14 @@ sealed interface Path {
 
 sealed interface Line {
 
-    sealed interface Command {
-        data class Cd(val path: Path) : Line
-        object Ls : Line
+    sealed interface Command : Line {
+        data class Cd(val path: Path) : Command
+        object Ls : Command
     }
 
-    sealed interface FileSystemItem {
-        data class File(val size: Int, val name: String) : Line
-        data class Directory(val name: String)
+    sealed interface FileSystemItem : Line {
+        data class File(val size: Int, val name: String) : FileSystemItem
+        data class Directory(val name: String) : FileSystemItem
     }
 }
 
@@ -30,7 +30,7 @@ fun parse(line: String): Line =
     when {
         line == "$ ls" -> Line.Command.Ls
         line.startsWith("$ cd") -> parseCd(line)
-        line.startsWith("dir") -> Line.Command.Ls//parseDirectory(line)
+        line.startsWith("dir") -> parseDirectory(line)
         """\d+ .*""".toRegex() matches line -> Line.Command.Ls //parseFile(line)
         else -> throw IllegalStateException("unrecognized line: $line")
     }
@@ -44,4 +44,10 @@ fun parseCd(line: String): Line.Command.Cd {
         else -> Path.Directory(pathString)
     }
     return Line.Command.Cd(path)
+}
+
+fun parseDirectory(line: String): Line.FileSystemItem.Directory {
+    val result = """dir (.+)""".toRegex().matchEntire(line)
+    val name = result?.groups?.get(1)?.value ?: throw IllegalStateException("dir name is null")
+    return Line.FileSystemItem.Directory(name)
 }
