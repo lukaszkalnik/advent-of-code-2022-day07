@@ -31,7 +31,7 @@ fun parse(line: String): Line =
         line == "$ ls" -> Line.Command.Ls
         line.startsWith("$ cd") -> parseCd(line)
         line.startsWith("dir") -> parseDirectory(line)
-        """\d+ .*""".toRegex() matches line -> Line.Command.Ls //parseFile(line)
+        """\d+ .*""".toRegex() matches line -> parseFile(line)
         else -> throw IllegalStateException("unrecognized line: $line")
     }
 
@@ -50,4 +50,11 @@ fun parseDirectory(line: String): Line.FileSystemItem.Directory {
     val result = """dir (.+)""".toRegex().matchEntire(line)
     val name = result?.groups?.get(1)?.value ?: throw IllegalStateException("dir name is null")
     return Line.FileSystemItem.Directory(name)
+}
+
+fun parseFile(line: String): Line.FileSystemItem.File {
+    val result = """(\d+) (.+)""".toRegex().matchEntire(line)
+    val size = result?.groups?.get(1)?.value?.toInt() ?: throw IllegalStateException("file size is null")
+    val name = result.groups[2]?.value ?: throw IllegalStateException("file name is null")
+    return Line.FileSystemItem.File(size, name)
 }
