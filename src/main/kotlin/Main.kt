@@ -1,6 +1,7 @@
 import okio.FileSystem
 import okio.Path.Companion.toPath
 
+//region parsing
 sealed interface Path {
     object Root : Path
     object Up : Path
@@ -19,13 +20,67 @@ sealed interface Line {
         data class Directory(val name: String) : FileSystemItem
     }
 }
+//endregion
+
+//region file system hierarchy
+data class File(val parent: Directory, val size: Int, val name: String)
+
+data class Directory(
+    val parent: Directory?,
+    val name: String,
+    val directories: MutableList<Directory> = mutableListOf(),
+    val files: MutableList<File> = mutableListOf(),
+) {
+
+    val size: Int get() = directories.sumOf { it.size } + files.sumOf { it.size }
+
+    fun changeDir(path: Path): Directory =
+        when (path) {
+            Path.Root -> rootDir
+            Path.Up -> parent ?: throw IllegalStateException("Impossible to navigate up from directory $this")
+            is Path.Directory -> directories.first { it.name == path.name }
+        }
+}
+
+// To make sure there is only one root dir
+val rootDir = Directory(parent = null, name = "/")
+//endregion
 
 fun main(args: Array<String>) {
     val path = "input.txt".toPath()
     val input = FileSystem.SYSTEM.read(path) { readUtf8() }.dropLast(1)
-    input.split("\n").map { line -> parse(line) }.forEach { println(it) }
+    val terminalOutput = input.split("\n").map { line -> parse(line) }
+
+    var currentDir: Directory = rootDir
+    terminalOutput.forEach { line ->
+        when (line) {
+            is Line.Command.Cd -> currentDir = currentDir.changeDir(line.path)
+            is Line.Command.Ls -> {}
+
+            is Line.FileSystemItem.File -> currentDir.files.add(
+                with(line) {
+                    File(
+                        parent = currentDir,
+                        size = size,
+                        name = name,
+                    )
+                }
+            )
+
+            is Line.FileSystemItem.Directory -> currentDir.directories.add(
+                with(line) {
+                    Directory(
+                        parent = currentDir,
+                        name = name,
+                    )
+                }
+            )
+        }
+    }
+
 }
 
+//region parsing
 fun parse(line: String): Line =
     when {
         line == "$ ls" -> Line.Command.Ls
@@ -58,3 +113,4 @@ fun parseFile(line: String): Line.FileSystemItem.File {
     val name = result.groups[2]?.value ?: throw IllegalStateException("file name is null")
     return Line.FileSystemItem.File(size, name)
 }
+//endregion
