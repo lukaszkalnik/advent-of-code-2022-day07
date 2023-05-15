@@ -121,11 +121,11 @@ fun parseFile(line: String): Line.FileSystemItem.File {
  */
 fun Directory.print(offset: Int) {
     val indent = " ".repeat(offset)
-    println("$indent dir $name")
+    println("${indent}dir $name")
 
     val childrenOffset = offset + 2
     directories.forEach { it.print(childrenOffset) }
 
-    val childrenIdent = " ".repeat(childrenOffset)
-    files.forEach { println("$childrenIdent$size $name") }
+    val childrenIndent = " ".repeat(childrenOffset)
+    files.forEach { file -> with(file) { println("$childrenIndent$size $name") } }
 }
