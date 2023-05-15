@@ -78,6 +78,7 @@ fun main(args: Array<String>) {
         }
     }
 
+    rootDir.print(0)
 }
 
 //region parsing
@@ -114,3 +115,17 @@ fun parseFile(line: String): Line.FileSystemItem.File {
     return Line.FileSystemItem.File(size, name)
 }
 //endregion
+
+/**
+ * Prints a directory and its children recursively. Each directory indented with given [offset].
+ */
+fun Directory.print(offset: Int) {
+    val indent = " ".repeat(offset)
+    println("$indent dir $name")
+
+    val childrenOffset = offset + 2
+    directories.forEach { it.print(childrenOffset) }
+
+    val childrenIdent = " ".repeat(childrenOffset)
+    files.forEach { println("$childrenIdent$size $name") }
+}
