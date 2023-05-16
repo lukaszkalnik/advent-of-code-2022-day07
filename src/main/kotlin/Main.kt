@@ -46,6 +46,10 @@ data class Directory(
 val rootDir = Directory(parent = null, name = "/")
 //endregion
 
+const val totalDiskSpace = 70_000_000
+const val requiredSpaceForUpdate = 30_000_000
+const val maxOccupiedSpace = totalDiskSpace - requiredSpaceForUpdate
+
 fun main(args: Array<String>) {
     val path = "input.txt".toPath()
     val input = FileSystem.SYSTEM.read(path) { readUtf8() }.dropLast(1)
@@ -78,10 +82,12 @@ fun main(args: Array<String>) {
         }
     }
 
+    val minSizeToBeDeleted = rootDir.size - maxOccupiedSpace
+
     val sizes = mutableListOf<Int>()
     rootDir.storeSizeAndSubdirsSizes(sizes)
-    val sumOfSmallDirs = sizes.filter { it <= 100_000 }.sum()
-    println(sumOfSmallDirs)
+    val smallestDirSizeToBeDeleted = sizes.filter { it >= minSizeToBeDeleted }.min()
+    println(smallestDirSizeToBeDeleted)
 }
 
 //region parsing
