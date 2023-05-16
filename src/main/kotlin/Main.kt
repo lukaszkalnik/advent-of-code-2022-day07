@@ -1,13 +1,19 @@
 import okio.FileSystem
 import okio.Path.Companion.toPath
 
-//region parsing
+//region parsing data types
+/**
+ * Path of the [Line.Command.Cd] command.
+ */
 sealed interface Path {
     object Root : Path
     object Up : Path
     data class Directory(val name: String) : Path
 }
 
+/**
+ * Parsed input line
+ */
 sealed interface Line {
 
     sealed interface Command : Line {
@@ -15,6 +21,9 @@ sealed interface Line {
         object Ls : Command
     }
 
+    /**
+     * Possible outputs of the [Line.Command.Ls] command.
+     */
     sealed interface FileSystemItem : Line {
         data class File(val size: Int, val name: String) : FileSystemItem
         data class Directory(val name: String) : FileSystemItem
@@ -34,6 +43,9 @@ data class Directory(
 
     val size: Int get() = directories.sumOf { it.size } + files.sumOf { it.size }
 
+    /**
+     * Returns the [Directory] object referenced by the given [Path] relative to this [Directory].
+     */
     fun changeDir(path: Path): Directory =
         when (path) {
             Path.Root -> rootDir
@@ -90,7 +102,7 @@ fun main(args: Array<String>) {
     println(smallestDirSizeToBeDeleted)
 }
 
-//region parsing
+//region parsing functions
 fun parse(line: String): Line =
     when {
         line == "$ ls" -> Line.Command.Ls
@@ -126,7 +138,7 @@ fun parseFile(line: String): Line.FileSystemItem.File {
 //endregion
 
 /**
- * Prints a directory and its children recursively. Each directory indented with given [offset].
+ * Prints a directory and its children recursively. Each directory with increased indentation, starting at given [offset].
  */
 fun Directory.print(offset: Int = 0) {
     val indent = " ".repeat(offset)
