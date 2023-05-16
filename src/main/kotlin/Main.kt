@@ -78,7 +78,10 @@ fun main(args: Array<String>) {
         }
     }
 
-    rootDir.print(0)
+    val sizes = mutableListOf<Int>()
+    rootDir.storeSizeAndSubdirsSizes(sizes)
+    val sumOfSmallDirs = sizes.filter { it <= 100_000 }.sum()
+    println(sumOfSmallDirs)
 }
 
 //region parsing
@@ -119,7 +122,7 @@ fun parseFile(line: String): Line.FileSystemItem.File {
 /**
  * Prints a directory and its children recursively. Each directory indented with given [offset].
  */
-fun Directory.print(offset: Int) {
+fun Directory.print(offset: Int = 0) {
     val indent = " ".repeat(offset)
     println("${indent}dir $name")
 
@@ -128,4 +131,12 @@ fun Directory.print(offset: Int) {
 
     val childrenIndent = " ".repeat(childrenOffset)
     files.forEach { file -> with(file) { println("$childrenIndent$size $name") } }
+}
+
+/**
+ * Gets size of this directory and its all subdirectories recursively and stores them in [sizes].
+ */
+fun Directory.storeSizeAndSubdirsSizes(sizes: MutableList<Int>) {
+    sizes.add(size)
+    directories.forEach { it.storeSizeAndSubdirsSizes(sizes) }
 }
