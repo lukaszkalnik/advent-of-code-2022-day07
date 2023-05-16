@@ -3,7 +3,7 @@
 Today's task was about parsing a terminal log of browsing a filesystem (using `cd` and `ls` commands. Then recreating
 that file system as a directory tree and calculating the directory sizes.
 
-# What I learned
+## What I learned
 
 * It's good to have separate hierarchies for parsed tokens and the actual directory hierarchy.
   * A `Directory` in the path of a `cd` command is something different from a directory as an output of an `ls` command,
@@ -20,7 +20,7 @@ that file system as a directory tree and calculating the directory sizes.
 * To repeat a string multiple times, you can use `String.repeat(Int)`. E.g.
   `"My string ".repeat(3) == "My string My string My string "`. Of course it also works for single character strings.
 
-# Part 2 plot twist
+## Part 2 plot twist
 
 It's actually very simple, instead of calculating a sum of sizes of selected directories, you have to find the smallest
 directory of at least the given size.
