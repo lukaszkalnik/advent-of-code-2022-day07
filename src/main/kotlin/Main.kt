@@ -36,7 +36,17 @@ fun main(args: Array<String>) {
     val path = "input.txt".toPath()
     val input = FileSystem.SYSTEM.read(path) { readUtf8() }.dropLast(1)
     val terminalOutput = input.split("\n").map { line -> parse(line) }
+    constructFileSystemHierarchy(terminalOutput)
 
+    val minSizeToBeDeleted = rootDir.size - maxOccupiedSpace
+
+    val sizes = mutableListOf<Int>()
+    rootDir.storeSizeAndSubdirsSizes(sizes)
+    val smallestDirSizeToBeDeleted = sizes.filter { it >= minSizeToBeDeleted }.min()
+    println(smallestDirSizeToBeDeleted)
+}
+
+private fun constructFileSystemHierarchy(terminalOutput: List<Line>) {
     var currentDir: Directory = rootDir
     terminalOutput.forEach { line ->
         when (line) {
@@ -63,13 +73,6 @@ fun main(args: Array<String>) {
             )
         }
     }
-
-    val minSizeToBeDeleted = rootDir.size - maxOccupiedSpace
-
-    val sizes = mutableListOf<Int>()
-    rootDir.storeSizeAndSubdirsSizes(sizes)
-    val smallestDirSizeToBeDeleted = sizes.filter { it >= minSizeToBeDeleted }.min()
-    println(smallestDirSizeToBeDeleted)
 }
 
 /**
